@@ -1,20 +1,70 @@
-// OOP_assignment_2.cpp : This file contains the 'main' function. Program execution begins and ends there.
-//
-
 #include <iostream>
+#include <string>
+#include <vector>
+#include <fstream>
+#include <sstream>
+#include <iostream>
+
+struct Product {
+    std::string type;
+    std::string name;
+    float price = 0;
+    int quantity = 0;
+    std::vector<std::string> additionalAttr;
+};
+
+class ConfigReader {
+public:
+    ConfigReader(const std::string& filename) {
+
+        std::ifstream file(filename);
+        std::string line;
+
+        if (!file.is_open()) {
+
+            std::cerr << "Failed to open file :(\n";
+            return;
+        }
+
+        while (getline(file, line)) {
+
+            if (line.empty() || line[0] == '#') {
+                continue;
+            }
+
+            std::istringstream gamer(line);
+            Product product;
+            std::string attrToken;
+
+            getline(gamer, product.type, ',');
+            getline(gamer, product.name, ',');
+
+            gamer >> product.price;
+            gamer.ignore();
+            gamer >> product.quantity;
+            gamer.ignore();
+
+            while (getline(gamer, attrToken, ',')) {
+                product.additionalAttr.push_back(attrToken);
+            }
+
+            products.push_back(product);
+        }
+    }
+
+    const std::vector<Product>& getProducts() const {
+        return products;
+    }
+
+private:
+    std::vector<Product> products;
+};
+
 
 int main()
 {
-    std::cout << "Hello World!\n";
+    ConfigReader configReader("test.txt");
+    std::vector<Product> products = configReader.getProducts();
+
+    return 0;
 }
-
-// Run program: Ctrl + F5 or Debug > Start Without Debugging menu
-// Debug program: F5 or Debug > Start Debugging menu
-
-// Tips for Getting Started: 
-//   1. Use the Solution Explorer window to add/manage files
-//   2. Use the Team Explorer window to connect to source control
-//   3. Use the Output window to see build output and other messages
-//   4. Use the Error List window to view errors
-//   5. Go to Project > Add New Item to create new code files, or Project > Add Existing Item to add existing code files to the project
-//   6. In the future, to open this project again, go to File > Open > Project and select the .sln file
