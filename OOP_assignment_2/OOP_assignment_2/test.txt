@@ -1,14 +1,12 @@
 # Product Configuration File
 # Format:
 # Product Type, Product Name, Price, Quantity, Additional Attributes
+
 # Electronics
 Electronics, Laptop, 799.99, 10, Dell, Inspiron 15, 45W
 Electronics, Smartphone, 499.99, 15, Apple, iPhone 12, 5.0 inches
 Electronics, Smart TV, 699.99, 5, Samsung, 4K UHD, 55 inches
-# Books
-Books, The Great Gatsby, 12.99, 20, F. Scott Fitzgerald, Fiction, 978-3-16-148410-0
-Books, To Kill a Mockingbird, 10.99, 25, Harper Lee, Fiction, 978-0-06-112008-4
-Books, The Catcher in the Rye, 14.99, 18, J.D. Salinger, Fiction, 978-0-316-76948-0
+
 # Clothing
 Clothing, T-Shirt, 19.99, 50, Medium, Blue, Cotton
 Clothing, Jeans, 39.99, 30, Large, Black, Denim
