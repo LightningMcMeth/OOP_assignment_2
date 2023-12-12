@@ -80,6 +80,8 @@ public:
         return price * qttyInStock;
     }
 
+    virtual ~Product() = default;
+
 protected:
     int productID = 0;
     std::string name;
@@ -93,6 +95,10 @@ public:
     Electronics(int ID, const std::string& name, float price, int quantity, const std::string& brand, const std::string& model, int power)
         : Product(ID, name, price, quantity), brand(brand), model(model), powerConsumption(power){}
 
+    std::string getBrand() const { return brand; }
+    std::string getModel() const { return model; }
+    int getPowerConsumption() const { return powerConsumption; }
+
 private:
     std::string brand;
     std::string model;
@@ -103,6 +109,10 @@ class Clothing : public Product {
 public:
     Clothing(int ID, const std::string& name, float price, int quantity, const std::string& size, const std::string& color, const std::string& material)
         : Product(ID, name, price, quantity), size(size), color(color), material(material){}
+
+    std::string getSize() const { return size; }
+    std::string getColor() const { return color; }
+    std::string getMaterial() const { return material; }
 
 private:
     std::string size;
@@ -122,9 +132,34 @@ public:
         }
     }
 
+    void listProducts() {
+
+        for (const auto& productPair : products) {
+            std::cout << "\n\n" << productPair.first << ":\n\n";
+
+            for (const auto& productPtr : productPair.second) {
+
+                auto elecPtr = std::dynamic_pointer_cast<Electronics>(productPtr);
+                auto clothPtr = std::dynamic_pointer_cast<Clothing>(productPtr);
+
+                if (elecPtr) {
+                    std::cout << "ID: " << elecPtr->getProductID() << " - " << elecPtr->getName() << " - $" << elecPtr->getPrice()
+                        << " - " << elecPtr->getBrand() << " - " << elecPtr->getModel() << " - "
+                        << elecPtr->getPowerConsumption() << "W - in stock: " << elecPtr->getQuantityInStock() << '\n';
+                }
+                else if (clothPtr) {
+                    std::cout << "ID: " << clothPtr->getProductID() << " - " << clothPtr->getName() << " - $" << clothPtr->getPrice()
+                        << " - " << clothPtr->getSize() << " - " << clothPtr->getColor() << " - "
+                        << clothPtr->getMaterial() << " - in stock: " << clothPtr->getQuantityInStock() << '\n';
+                }
+            }
+        }
+    }
+
 private:
     std::map<std::string, std::vector<std::shared_ptr<Product>>> products;
     int ID = 0;
+    int stockThreshhold = 3;
 
     void addProduct(const ProductData& productData) {
 
@@ -175,7 +210,9 @@ private:
 class UI {
 public:
 
+
 private:
+    std::vector<std::shared_ptr<Product>> boughtProducts;
 };
 
 
@@ -186,7 +223,38 @@ int main()
     Inventory inventory;
     UI interface;
 
+    std::string commandType;
+
     inventory.setProducts(configReader.getProducts());
+
+    while (true) {
+        std::cin.ignore();
+
+        std::cout << "\n\nEnter your command (buy, view, return, list): ";
+        std::cin >> commandType;
+        std::cout << '\n';
+
+        if (commandType == "list") {
+
+            inventory.listProducts();
+        }
+        else if (commandType == "buy") {
+
+        }
+        else if (commandType == "return") {
+
+        }
+        else if (commandType == "view") {
+
+        }
+        else if (commandType == "exit") {
+
+            return 0;
+        }
+        else {
+            std::cout << "Unknown command.\n";
+        }
+    }
 
     return 0;
 }
