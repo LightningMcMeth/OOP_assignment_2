@@ -61,6 +61,8 @@ private:
     std::vector<ProductData> products;
 };
 
+
+
 class Product {
 public:
 
@@ -89,6 +91,8 @@ protected:
     int qttyInStock;
 };
 
+
+
 class Electronics : public Product {
 public:
 
@@ -105,6 +109,8 @@ private:
     int powerConsumption = 0;
 };
 
+
+
 class Clothing : public Product {
 public:
     Clothing(int ID, const std::string& name, float price, int quantity, const std::string& size, const std::string& color, const std::string& material)
@@ -119,6 +125,8 @@ private:
     std::string color;
     std::string material;
 };
+
+
 
 class Inventory {
 public:
@@ -143,16 +151,48 @@ public:
                 auto clothPtr = std::dynamic_pointer_cast<Clothing>(productPtr);
 
                 if (elecPtr) {
+
                     std::cout << "ID: " << elecPtr->getProductID() << " - " << elecPtr->getName() << " - $" << elecPtr->getPrice()
                         << " - " << elecPtr->getBrand() << " - " << elecPtr->getModel() << " - "
                         << elecPtr->getPowerConsumption() << "W - in stock: " << elecPtr->getQuantityInStock() << '\n';
                 }
                 else if (clothPtr) {
+
                     std::cout << "ID: " << clothPtr->getProductID() << " - " << clothPtr->getName() << " - $" << clothPtr->getPrice()
                         << " - " << clothPtr->getSize() << " - " << clothPtr->getColor() << " - "
                         << clothPtr->getMaterial() << " - in stock: " << clothPtr->getQuantityInStock() << '\n';
                 }
             }
+        }
+    }
+
+    std::shared_ptr<Product> getProductByID(int id) {
+
+        for (auto& category : products) {
+
+            for (auto& product : category.second) {
+
+                if (product->getProductID() == id) {
+
+                    return product;
+                }
+            }
+        }
+        return nullptr;
+    }
+
+    int getStockThreshold() const {
+        return stockThreshhold;
+    }
+
+    
+    void returnProduct(int productID, int quantity) {
+
+        auto product = getProductByID(productID);
+
+        if (product != nullptr) {
+
+            product->setQuantityInStock(product->getQuantityInStock() + quantity);
         }
     }
 
@@ -210,6 +250,70 @@ private:
 class UI {
 public:
 
+    void buyProduct(Inventory& inventory, int productID, int quantity) {
+
+        auto product = inventory.getProductByID(productID);
+
+        if (product != nullptr && product->getQuantityInStock() >= quantity) {
+
+            float totalCost = product->getPrice() * quantity;
+            product->setQuantityInStock(product->getQuantityInStock() - quantity);
+
+            boughtProducts.push_back(std::make_shared<Product>(*product));
+            boughtProducts.back()->setQuantityInStock(quantity);
+
+            std::cout << "Purchased " << product->getName() << " quantity: " << quantity << " for: $" << totalCost << ".\n";
+
+            if (product->getQuantityInStock() <= inventory.getStockThreshold()) {
+
+                std::cout << "!!!Low stock running low for " << product->getName() << " Current quantity: " << product->getQuantityInStock() << " !!!\n";
+            }
+        }
+        else {
+            std::cout << "Not enough stock or invalid product ID.\n";
+        }
+    }
+
+    void returnProduct(Inventory& inventory, int productID, int quantity) {
+
+        for (auto it = boughtProducts.begin(); it != boughtProducts.end(); ++it) {
+
+            if ((*it)->getProductID() == productID) {
+
+                if (quantity <= (*it)->getQuantityInStock()) {
+
+                    inventory.returnProduct(productID, quantity);
+
+                    std::cout << "Returned " << quantity << " units of " << (*it)->getName() << std::endl;
+
+                    (*it)->setQuantityInStock((*it)->getQuantityInStock() - quantity);
+
+                    if ((*it)->getQuantityInStock() == 0) {
+
+                        boughtProducts.erase(it);
+                    }
+                    return;
+                }
+                else {
+
+                    std::cout << "Invalid quantity input.\n";
+                    return;
+                }
+            }
+        }
+    }
+
+    std::shared_ptr<Product> getBoughtProdcut(int productID) {
+
+        for (auto& product : boughtProducts) {
+
+            if (product->getProductID() == productID) {
+
+                return product;
+            }
+        }
+        return nullptr;
+    }
 
 private:
     std::vector<std::shared_ptr<Product>> boughtProducts;
@@ -240,11 +344,22 @@ int main()
         }
         else if (commandType == "buy") {
 
+            int productID, quantity;
+
+            std::cout << "Enter product ID and quantity: ";
+            std::cin >> productID >> quantity;
+
+            interface.buyProduct(inventory, productID, quantity);
+
         }
         else if (commandType == "return") {
 
-        }
-        else if (commandType == "view") {
+            int productID, quantity;
+
+            std::cout << "Enter product ID and quantity: ";
+            std::cin >> productID >> quantity;
+
+            interface.returnProduct(inventory, productID, quantity);
 
         }
         else if (commandType == "exit") {
